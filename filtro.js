@@ -1,4 +1,9 @@
-// Tenemos un li de productos
+// Cambios generales
+/**
+ * Se quita el uso de var
+ * Se renombran funciones para mayor claridad.
+ * Se renombran funciones, para ser consistente con la nomenclatura en inglés del resto del código.
+ * */
 
 const productos = [
   {nombre: "Zapato negro", tipo: "zapato", color: "negro", img: "./taco-negro.jpg"},
@@ -8,56 +13,60 @@ const productos = [
   {nombre: "Zapato rojo", tipo: "zapato", color: "rojo", img: "./zapato-rojo.jpg"}
 ]
 
-const li = document.getElementsByName("lista-de-productos")
-const $i = document.querySelector('.input');
+/**
+ * Se cambia a querySelector para seleccionar el contenedor de productos (#lista-de-productos), 
+ * por ser más específico y adecuado que getElementsByName
+ */
 
-for (let i = 0; i < productos.length; i++) {
-  var d = document.createElement("div")
-  d.classList.add("producto")
+const productsList = document.querySelector("#lista-de-productos");
 
-  var ti = document.createElement("p")
-  ti.classList.add("titulo")
-  ti.textContent = productos[i].nombre
-  
-  var imagen = document.createElement("img");
-  imagen.setAttribute('src', productos[i].img);
-
-  d.appendChild(ti)
-  d.appendChild(imagen)
-
-  li.appendChild(d)
+/** 
+* Se incorpora la función readInput para capturar el valor de entrada, homogenizar la entrada(en minúsculas),
+* simplificando la lectura y mejorando la reutilización del código.
+*/
+function readInput() {
+  const userInput = document.querySelector('input');
+  return userInput.value.toLowerCase();
 }
 
-displayProductos(productos)
-const botonDeFiltro = document.querySelector("button");
+// Se elimino el código repetido y se mantiene en la función displayProducts
 
-botonDeFiltro.onclick = function() {
-  while (li.firstChild) {
-    li.removeChild(li.firstChild);
-  }
+/**
+ * Se reemplaza blucle while por un innerhtml para limpiar el contenedor de productos
+ * antes de renderizar los nuevos elementos filtrados.
+ */
 
-  const texto = $i.value;
-  console.log(texto);
-  const productosFiltrados = filtrado(productos, texto );
+function displayProducts(filterArray) {
+  productsList.innerHTML = '';
 
-  for (let i = 0; i < productosFiltrados.length; i++) {
-    var d = document.createElement("div")
-    d.classList.add("producto")
-  
-    var ti = document.createElement("p")
-    ti.classList.add("titulo")
-    ti.textContent = productosFiltrados[i].nombre
-    
-    var imagen = document.createElement("img");
-    imagen.setAttribute('src', productosFiltrados[i].img);
-  
-    d.appendChild(ti)
-    d.appendChild(imagen)
-  
-    li.appendChild(d)
-  }
+  filterArray.forEach(product => {
+    const productContainer = document.createElement("div");
+    productContainer.classList.add("producto")
+
+    const productName = document.createElement("p");
+    productName.textContent= product.nombre;
+    productContainer.appendChild(productName);
+
+    const productImage = document.createElement("img");
+    productImage.setAttribute('src', product.img);
+    productImage.setAttribute('alt', product.nombre);
+    productContainer.appendChild(productImage);
+
+    productsList.appendChild(productContainer);
+  });
 }
 
-const filtrado = (productos = [], texto) => {
-  return productos.filter(item => item.tipo.includes(texto) || item.color.includes(texto));
+const filtered = (products, text) => {
+  return products.filter(product => product.tipo.includes(text) || product.color.includes(text));
 }  
+
+const filterButton = document.querySelector("button");
+/**
+ * Se usa addEventListener('click', ...) en lugar de onlick, para agregar el evento de clic al botón.
+ * Al ser más versátil y permitir agregar múltiples listeners al mismo evento si es necesario. 
+ */
+filterButton.addEventListener('click', ()=> {
+  const productosFiltrados = filtered(productos, readInput());
+  displayProducts(productosFiltrados);
+  document.querySelector('input').value = '';
+})
